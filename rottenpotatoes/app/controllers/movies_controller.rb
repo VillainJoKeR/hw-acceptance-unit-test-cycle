@@ -7,7 +7,59 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @movies = Movie.all
+    # clear session on load
+    if request.env['PATH_INFO'] == '/'
+      session.clear
+    end
+      
+    sort = params[:sort]
+    submit_clicked = params[:submit_clicked]
+    
+    @all_ratings = Movie.all_ratings
+    generatedRatings = {}
+    @all_ratings.each{ |rating| generatedRatings[rating] = 1 }
+    
+    ratings = {}
+    
+    if(submit_clicked)
+      if(!params[:ratings])
+        ratings = generatedRatings
+        session[:ratings] = nil
+      else
+        ratings = params[:ratings]
+        session[:ratings] = ratings
+      end
+    elsif(params[:ratings]) 
+      ratings = params[:ratings]
+      
+      session[:ratings] = ratings
+    elsif(session[:ratings])
+      ratings = session[:ratings]
+    else
+      ratings = generatedRatings
+      session[:ratings] = nil
+    end
+    
+    if(sort)
+      session[:sort] = sort
+    elsif session[:sort]
+      sort = session[:sort]
+    end
+    
+    case sort
+      when "movies_title"
+        @movies = Movie.order(:title)
+        @sort = "movies_title"
+      when "release_date"
+        @movies = Movie.order(:release_date)
+        @sort = "release_date"
+      else
+        @movies = Movie.all
+        @sort = ''
+    end
+    
+    @ratings_to_show = ratings == generatedRatings ? [] : ratings.keys
+    @movies = @movies.with_ratings(ratings.keys)
   end
 
   def new
