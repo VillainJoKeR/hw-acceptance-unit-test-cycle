@@ -23,3 +23,8 @@ Then /I should see all the movies/ do
     step %{I should see "#{movie.title}"}
   end
 end
+
+Then /the director of "(.*)" should be "(.*)"/ do |movie_name, director_name|
+  # Make sure that the director of movie is correct
+  Movie.exists?(title: movie_name, director: director_name).should be_truthy
+end
