@@ -15,7 +15,7 @@ class Movie < ActiveRecord::Base
         select(:rating).map(&:rating).uniq
     end
     
-    def self.get_similar_movies movie_id
+    def self.get_similar_movies(movie_id)
         director = Movie.find_by(id: movie_id).director
         
         return nil if director.blank? || director.nil?
